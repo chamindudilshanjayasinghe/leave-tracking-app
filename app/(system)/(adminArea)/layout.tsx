@@ -1,7 +1,10 @@
 'use client'
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AppHeader from "../components/header";
 import AppSidebar from "../components/sidebar";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import Loader from "../components/loader";
 
 export default function AdminLayout({
     children,
@@ -9,10 +12,32 @@ export default function AdminLayout({
     children: React.ReactNode;
 }>) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const { status } = useSession();
+    const router = useRouter();
+
+
+    // 🔐 Redirect side effect
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            router.replace('/login');
+        }
+    }, [status, router]);
+
+    // ⏳ Global session loading screen
+    if (status === 'loading') {
+        return (
+            <Loader />
+        );
+    }
+
+    // 🚫 While redirecting, render nothing
+    if (status === 'unauthenticated') {
+        return null;
+    }
+
+    // ✅ Authenticated layout
     return (<>
         <div className="min-h-screen bg-slate-50 flex font-sans">
-
-
             {/* Mobile Sidebar Overlay */}
             {sidebarOpen && (
                 <div

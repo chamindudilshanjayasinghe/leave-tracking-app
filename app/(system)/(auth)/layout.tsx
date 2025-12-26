@@ -1,3 +1,5 @@
+'use client';
+
 import { Calendar, CheckCircle } from "lucide-react";
 
 export default function AuthLayout({

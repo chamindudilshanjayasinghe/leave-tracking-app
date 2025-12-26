@@ -25,19 +25,19 @@ const authHandler = NextAuth({
                 }
 
                 try {
-                    const response = await apiClient.post("ch/auth/login", {
+                    const response = await apiClient.post("/auth/token", {
                         email: credentials.email,
                         password: credentials.password,
                     });
 
-                    const result = response.data?.result;
-                    if (!result?.user || !result?.access_token) return null;
+                    const result = response.data;
+                    if (!result?.userId || !result?.accessToken) return null;
 
                     return {
-                        id: result.user.id,
-                        accessToken: result.access_token,
-                        user: result.user,
-                        tenant: result.tenant,
+                        id: result.userId,
+                        accessToken: result.accessToken,
+                        user: { first_name: result.firstName, last_name: result.lastName, role: result.role },
+                        tenant: { id: result.tenantId, name: result.tenantName},
                     };
                 } catch (error: any) {
                     console.error("AUTH ERROR:", error?.response?.data || error.message);

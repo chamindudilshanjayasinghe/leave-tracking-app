@@ -2,12 +2,30 @@
 import { ArrowLeft, Building2, Eye, EyeOff, Lock, Mail, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import CustomInput from "../../components/input";
+import ButtonLoader from "../../components/buttonLoader";
+import CustomButton from "../../components/CustomButton";
+import apiClient from "@/lib/apiClient";
+import { useForm } from "react-hook-form";
+import { signupSchema } from "@/validation/signupSchema";
+import { zodResolver } from "@hookform/resolvers/zod";
+
 
 export default function SignUpPage() {
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors, isSubmitting },
+    } = useForm({
+        resolver: zodResolver(signupSchema),
+    });
+
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const router = useRouter();
+
     // Signup State
     const [signupData, setSignupData] = useState({
         businessName: '',
@@ -23,6 +41,49 @@ export default function SignUpPage() {
             [e.target.name]: e.target.value
         });
     };
+
+    // const handleSignupSubmit = async (e: React.FormEvent) => {
+    //     e.preventDefault();
+
+    //     setIsLoading(true);
+    //     setError("");
+
+    //     try {
+    //         await apiClient.post("/auth/signup", {
+    //             email: signupData.email,
+    //             password: signupData.password,
+    //             firstName: signupData.firstName,
+    //             lastName: signupData.lastName,
+    //             businessName: signupData.businessName,
+    //         });
+    //         router.replace("/login?signup=success");
+    //     } catch (err: any) {
+    //         // Axios error handling
+    //         const message = err?.response?.data?.message || 'Signup failed. Please try again.';
+
+    //         setError(message);
+    //     } finally {
+    //         // Always stop loader
+    //         setIsLoading(false);
+    //     }
+    // };
+
+    const onSubmit = async (data: any) => {
+        setError("");
+        try {
+            await apiClient.post("/auth/signup", data);
+
+            router.replace("/login?signup=success");
+
+        } catch (err: any) {
+            const message =
+                err?.response?.data?.message ||
+                "Signup failed. Please try again.";
+
+            setError(message);
+        }
+    };
+
 
     const backToLogin = () => {
         router.push('/login');
@@ -41,7 +102,7 @@ export default function SignUpPage() {
                     <p className="text-gray-500 text-sm mt-1">Get started with your free company account.</p>
                 </div>
 
-                <form onSubmit={() => { }} className="space-y-4">
+                <form autoComplete="off" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
 
                     {/* Business Name */}
                     <div className="space-y-1">
@@ -50,15 +111,13 @@ export default function SignUpPage() {
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <Building2 className="h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
                             </div>
-                            <input
+                            <CustomInput
                                 type="text"
-                                name="businessName"
-                                required
-                                value={signupData.businessName}
-                                onChange={handleSignupChange}
-                                className="block w-full pl-10 pr-3 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-sm outline-none"
                                 placeholder="Acme Inc."
+                                error={errors.businessName?.message}
+                                {...register("businessName")}
                             />
+                            
                         </div>
                     </div>
 
@@ -70,13 +129,10 @@ export default function SignUpPage() {
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <User className="h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
                                 </div>
-                                <input
+                                <CustomInput
                                     type="text"
-                                    name="firstName"
-                                    required
-                                    value={signupData.firstName}
-                                    onChange={handleSignupChange}
-                                    className="block w-full pl-10 pr-3 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-sm outline-none"
+                                    {...register("firstName")}
+                                    error={errors.firstName?.message}
                                     placeholder="John"
                                 />
                             </div>
@@ -84,13 +140,10 @@ export default function SignUpPage() {
                         <div className="space-y-1">
                             <label className="text-sm font-medium text-gray-700 block">Last Name</label>
                             <div className="relative group">
-                                <input
+                                <CustomInput
                                     type="text"
-                                    name="lastName"
-                                    required
-                                    value={signupData.lastName}
-                                    onChange={handleSignupChange}
-                                    className="block w-full px-3 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-sm outline-none"
+                                    {...register("lastName")}
+                                    error={errors.lastName?.message}
                                     placeholder="Doe"
                                 />
                             </div>
@@ -104,13 +157,11 @@ export default function SignUpPage() {
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <Mail className="h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
                             </div>
-                            <input
+                            <CustomInput
                                 type="email"
-                                name="email"
                                 required
-                                value={signupData.email}
-                                onChange={handleSignupChange}
-                                className="block w-full pl-10 pr-3 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-sm outline-none"
+                                {...register("email")}
+                                error={errors.email?.message}
                                 placeholder="you@company.com"
                             />
                         </div>
@@ -123,13 +174,12 @@ export default function SignUpPage() {
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <Lock className="h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
                             </div>
-                            <input
+
+                            <CustomInput
                                 type={showPassword ? "text" : "password"}
-                                name="password"
                                 required
-                                value={signupData.password}
-                                onChange={handleSignupChange}
-                                className="block w-full pl-10 pr-10 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-sm outline-none"
+                                {...register("password")}
+                                error={errors.password?.message}
                                 placeholder="Create a password"
                             />
                             <button
@@ -149,21 +199,18 @@ export default function SignUpPage() {
                             {error}
                         </div>
                     )}
-
-                    <button
+                    <CustomButton
                         type="submit"
+                        className={`w-full flex items-center justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:shadow-md'}`}
+                        fullWidth
+                        isLoading={isLoading}
                         disabled={isLoading}
-                        className={`w-full flex items-center justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:shadow-md'
-                            }`}
                     >
                         {isLoading ? (
-                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
+                            <ButtonLoader />
                         ) : null}
                         {isLoading ? 'Creating Account...' : 'Sign Up'}
-                    </button>
+                    </CustomButton>
 
                     <p className="text-xs text-center text-gray-500 mt-4">
                         By signing up, you agree to our Terms of Service and Privacy Policy.

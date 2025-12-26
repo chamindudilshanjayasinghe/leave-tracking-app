@@ -1,4 +1,6 @@
+import { sign } from "crypto";
 import { Bell, LogOut, Menu, Plus, Search } from "lucide-react";
+import { signOut } from "next-auth/react";
 import { useState } from "react";
 
 export default function AppHeader() {
@@ -20,7 +22,7 @@ export default function AppHeader() {
                 </div>
 
                 <div className="flex items-center gap-4">
-                    
+
                     <div className="hidden md:flex items-center relative">
                         <Search className="w-4 h-4 absolute left-3 text-gray-400" />
                         <input
@@ -35,7 +37,13 @@ export default function AppHeader() {
                     </button>
                     <div className="h-8 w-px bg-gray-200 mx-2"></div>
                     <button
-                        onClick={() => { }}
+                        onClick={() => {
+                            signOut(
+                                {
+                                    redirect: false,
+                                }
+                            );
+                        }}
                         className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-red-600 transition-colors"
                     >
                         <LogOut className="w-4 h-4" />

@@ -4,6 +4,7 @@ import { Mail, Lock, Eye, EyeOff, Calendar, CheckCircle, ArrowRight, Plane } fro
 import { useRouter } from 'next/navigation';
 import CustomInput from '../../components/input';
 import CustomButton from '../../components/CustomButton';
+import { signIn } from 'next-auth/react';
 
 /**
  * LoginPage Component
@@ -22,21 +23,34 @@ const LoginPage = ({ onLoginSuccess }: LoginPageProps) => {
   const [error, setError] = useState('');
   const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     setError('');
     setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      if (email && password.length >= 6) {
-        onLoginSuccess();
-      } else {
-        setError('Invalid credentials. Password must be at least 6 characters.');
+    try {
+      const res = await signIn("credentials", {
+        email,
+        password,
+        redirect: false, // IMPORTANT: control redirect manually
+      });
+
+      if (res?.error) {
+        setError("Invalid email or password");
+        setIsLoading(false);
+        return;
       }
-    }, 1500);
+
+      // ✅ Login success
+      onLoginSuccess(); // or router.replace('/dashboard')
+
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
+      setIsLoading(false);
+    }
   };
+
 
   const navigateTo = (route: string) => {
     router.push(route);

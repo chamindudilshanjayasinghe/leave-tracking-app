@@ -1,43 +1,31 @@
 'use client';
-import Image from "next/image";
+
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export default function Home() {
-
+  const { status } = useSession();
   const router = useRouter();
 
   useEffect(() => {
-    router.replace('/login');
-  }, [router]);
+    if (status === 'unauthenticated') {
+      router.replace('/login');
+    }
 
-  return (
-    <>
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 font-sans">
-        <div className="max-w-4xl w-full bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row">
-          <div className="md:w-1/2 p-8 md:p-12 flex flex-col justify-center items-center">
-            <Image
-              src="/logo.png"
-              alt="LeaveTrack Logo"
-              width={150}
-              height={150}
-              className="mb-6"
-            />
-            <h1 className="text-3xl md:text-4xl font-bold mb-4 leading-tight text-center">
-              Redirecting to Login...
-            </h1>
-            <p className="text-gray-600 text-sm md:text-base opacity-90 text-center">
-              If you are not redirected automatically, please click the button below.
-            </p>
-            <button
-              onClick={() => router.push('/login')}
-              className="mt-6 px-6 py-3 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors"
-            >
-              Go to Login
-            </button>
-          </div>
-        </div>
+    if (status === 'authenticated') {
+      router.replace('/dashboard');
+    }
+  }, [status, router]);
+
+  if (status === 'loading') {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600"></div>
       </div>
-    </>
-  );
+    );
+  }
+
+  // while redirecting, render nothing
+  return null;
 }

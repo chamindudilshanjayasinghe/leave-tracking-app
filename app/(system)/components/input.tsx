@@ -1,38 +1,31 @@
 import React from "react";
 
-
-type CommonInputProps = {
-  type?: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  placeholder?: string;
-  required?: boolean;
-  className?: string;
-  [key: string]: any;
+type CommonInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
+  error?: string;
 };
 
-const CustomInput = ({
-  type = "text",
-  value,
-  onChange,
-  placeholder = "",
-  required = false,
-  className = "",
-  ...props
-}: CommonInputProps) => {
-  return (
-    <input
-      type={type}
-      value={value}
-      onChange={onChange}
-      placeholder={placeholder}
-      required={required}
-      className={`block w-full pl-10 pr-3 py-2.5 border border-gray-300 text-black rounded-lg 
-        focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 
-        transition-all text-sm outline-none ${className}`}
-      {...props}
-    />
-  );
-};
+const CustomInput = React.forwardRef<HTMLInputElement, CommonInputProps>(
+  ({ className = "", error, ...props }, ref) => {
+    return (
+      <div className="w-full">
+        <input
+          ref={ref}
+          className={`block w-full pl-10 pr-3 py-2.5 border text-black rounded-lg 
+            focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 
+            transition-all text-sm outline-none
+            ${error ? "border-red-500" : "border-gray-300"}
+            ${className}`}
+          {...props}
+        />
+
+        {error && (
+          <p className="mt-1 text-xs text-red-500">{error}</p>
+        )}
+      </div>
+    );
+  }
+);
+
+CustomInput.displayName = "CustomInput";
 
 export default CustomInput;
